@@ -1,0 +1,12 @@
+.ce-block__content,
+.ce-toolbar__content {
+  max-width: 900px;
+  /* @apply w-full max-sm:max-w-sm; */
+}
+.editorjs h2 {
+  @apply text-2xl font-bold my-4;
+}
+
+.editorjs h3 {
+  @apply text-xl font-semibold my-3;
+}

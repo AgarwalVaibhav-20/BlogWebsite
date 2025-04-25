@@ -1,0 +1,9 @@
+# POST http://localhost:4000/api/signin
+# Content-Type: application/json
+
+# {
+#     "email":"remebob@mailinator.com",
+#     "password":"Pa$$w0rd!"
+# }
+
+GET http://localhost:4000/api/get-upload-url
