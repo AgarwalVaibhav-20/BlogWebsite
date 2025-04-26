@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 async function DBConnect(url) {
     try {
@@ -12,4 +12,4 @@ async function DBConnect(url) {
     }
 }
 
-module.exports = { DBConnect };
+export default DBConnect;

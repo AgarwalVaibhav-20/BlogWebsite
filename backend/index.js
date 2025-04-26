@@ -1,14 +1,16 @@
-const express = require("express");
+import dotenv from "dotenv";
+import express from "express";
 const app = express();
 const PORT = 4000;
-const cors = require('cors')
-const { DBConnect } = require("./DB/DBconnect");
-const userSchema = require("./routes/auth");
-const searchbar = require("./routes/searchbar");
-const verification = require("./routes/verifyUser");
-const Image = require('./routes/Image')
+import cors from 'cors';
+import DBConnect from "./DB/DBconnect.js";
+import userSchema from "./routes/auth.js";
+import searchbar from "./routes/searchbar.js";
+import verification from "./routes/verifyUser.js";
+import Image from './routes/Image.js';
 // const WriteBlog = require('./routes/uploadingImagesWithCloudinary')
 
+dotenv.config();
 // Middleware
 app.use(express.json()); // Parses incoming JSON requests
 app.use(express.urlencoded({ extended: false })); // Parses URL-encoded data

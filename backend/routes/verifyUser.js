@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const User = require("../models/user"); // Assuming you have a User model
+import User from "../models/user.js"; // Assuming you have a User model
 
 router.post("/verification", async (req, res) => {
   try {
@@ -22,4 +22,4 @@ router.post("/verification", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

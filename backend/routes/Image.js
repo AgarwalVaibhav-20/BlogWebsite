@@ -1,11 +1,11 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const multer = require("multer");
-const cloudinary = require("cloudinary").v2;
-const fs = require("fs");
-const path = require("path");
-const Image = require("../models/Image");
-const nonoid = require("nanoid");
+import multer from "multer";
+import {v2 as cloudinary} from "cloudinary";
+import fs from "fs";
+import path from "path";
+import Image from "../models/Image.js";
+import {nanoid} from "nanoid";
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -189,4 +189,4 @@ router.get("/images", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
