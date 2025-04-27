@@ -17,7 +17,7 @@ cloudinary.config({
 // Configure multer for local storage (temporarily)
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join(__dirname, "../uploads");
+    const uploadDir = path.join("../uploads"); // const uploadDir = path.join(__dirname, "../uploads");
 
     // Create the uploads directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {

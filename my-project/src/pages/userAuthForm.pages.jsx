@@ -35,7 +35,7 @@ const UserAuthForm = ({ type }) => {
       })
       .catch((error) => {
         console.log("Axios error:", error);
-        toast.error(error?.response?.data?.error || "Something went wrong");
+        toast.error(error?.response?.data?.message || "Something went wrong");
       });
   };
 
@@ -59,11 +59,12 @@ const UserAuthForm = ({ type }) => {
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
     //form data==>
     let form = new FormData(authForm.current);
-    let formData = {};
+    let formDataObj = {};
     for (let [key, value] of form.entries()) {
       formData[key] = value;
     }
     console.log(formData);
+    console.log(formDataObj);
     //form validation
     let { fullname, email, password } = formData;
     if (fullname) {
@@ -76,6 +77,11 @@ const UserAuthForm = ({ type }) => {
     }
     if (!emailRegex.test(email)) {
       return toast.error("Email is invalid");
+    }
+    if(!password.length){
+      return toast.error(
+        "Password cannot be empty"
+      );
     }
     if (!passwordRegex.test(password)) {
       return toast.error(
@@ -130,6 +136,7 @@ const UserAuthForm = ({ type }) => {
               name="password"
               type={showPassword ? "text" : "password"}
               placeholder="Password"
+              required
               value={formData.password}
               onChange={handleChange}
               className="input-box w-full pl-12 pr-12 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
