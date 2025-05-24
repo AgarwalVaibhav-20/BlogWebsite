@@ -64,12 +64,12 @@ const Header = () => {
   return (
     <>
       <nav
-        className={`transition-transform duration-300 ${
-          showNavbar ? "translate-y-0" : "-translate-y-full"
-        } fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 shadow-md`}
+        // className={`transition-transform duration-300 ${
+        //   showNavbar ? "translate-y-0" : "-translate-y-full"
+        // } fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 shadow-md`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center w-full py-1">
+          <div className="flex justify-between items-center w-full py-1 h-auto">
             {/* Logo */}
             <Link
               to="/"

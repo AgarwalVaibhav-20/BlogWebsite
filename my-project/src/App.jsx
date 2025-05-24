@@ -6,6 +6,8 @@ import { lookInSession } from "./common/session";
 import { TailSpin } from "react-loader-spinner";
 import Editor from "./components/editor.pages";
 import '@/App.css'
+import SearchPage from "./pages/search.page";
+import HomePage from "./pages/home.page";
 export const UserContext = createContext({});
 
 const App = () => {
@@ -45,9 +47,11 @@ const App = () => {
     <UserContext.Provider value={{ userAuth, setUserAuth }}>
       <Routes>
         <Route path="/editor" element={<Editor/>}/>
-        <Route path="/" element={<Header />}>
+        <Route path="/" element={<Header />}> 
+        <Route index element={<HomePage/>} />
           <Route path="signin" element={<UserAuthForm type="sign-in" />} />
           <Route path="signup" element={<UserAuthForm type="sign-up" />} />
+          <Route path="search/:query" element={<SearchPage/>}/> 
         </Route>
       </Routes>
     </UserContext.Provider>
