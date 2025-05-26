@@ -7,6 +7,7 @@ import { EditorContext } from "../components/editor.pages";
 import toast from "react-hot-toast";
 import EditorJS from "@editorjs/editorjs";
 import { tools } from "./Tools.components";
+import { uploadImageToCloudinaryRemote } from "./helper/uploadImage";
 
 const BlogEditor = () => {
   const {
@@ -78,18 +79,14 @@ const BlogEditor = () => {
     setUploading(true);
     setError(null);
 
-    const formData = new FormData();
-    formData.append("image", imageFile);
-
     try {
+      const result  = await uploadImageToCloudinaryRemote(imageFile)
+      if(!result){
+        throw new Error("Something got wrong!");
+      }
       const response = await axios.post(
         import.meta.env.VITE_SERVER_UPLOAD,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        result
       );
 
       if (response.data && response.data.url) {
@@ -100,6 +97,7 @@ const BlogEditor = () => {
       } else {
         throw new Error("Invalid response format");
       }
+      
     } catch (err) {
       console.error("Upload error:", err);
       setError("Error uploading image. Please try again.");
