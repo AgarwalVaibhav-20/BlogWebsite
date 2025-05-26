@@ -6,6 +6,7 @@ import fs from "fs";
 import path from "path";
 import Image from "../models/Image.js";
 import {nanoid} from "nanoid";
+import axios from 'axios';
 // Configure Cloudinary
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -17,7 +18,7 @@ cloudinary.config({
 // Configure multer for local storage (temporarily)
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    const uploadDir = path.join("/uploads"); // const uploadDir = path.join(__dirname, "../uploads");
+    const uploadDir = path.join("./uploads"); // const uploadDir = path.join(__dirname, "../uploads");
 
     // Create the uploads directory if it doesn't exist
     if (!fs.existsSync(uploadDir)) {
@@ -87,37 +88,22 @@ const handleMulterError = (err, req, res, next) => {
 // API endpoint for image upload
 router.post(
   "/upload-image",
-  upload.single("image"),
-  handleMulterError,
   async (req, res) => {
     try {
-      if (!req.file) {
-        return res.status(400).json({ error: "No file uploaded" });
-      }
-
-      // Upload file to Cloudinary
-      const result = await cloudinary.uploader.upload(req.file.path, {
-        folder: "blog_uploads",
-        transformation: [{ width: 1200, crop: "limit" }, { quality: "auto" }],
-      });
-
-      // Delete the local file after uploading to Cloudinary
-      fs.unlinkSync(req.file.path);
+      const response = req.body;
 
       // Create image document in database
+
       const imageData = {
-        url: result.secure_url,
-        public_id: result.public_id,
-        format: result.format,
-        width: result.width,
-        height: result.height,
-        bytes: result.bytes,
+        url: response.secure_url,
+        public_id: response.public_id,
+        format: response.format,
+        width: response.width,
+        height: response.height,
+        bytes: response.bytes,
       };
 
-      // If you have authentication, you can add the user ID
-      // if (req.user) {
-      //   imageData.uploaded_by = req.user._id;
-      // }
+      console.table(imageData)
 
       const newImage = new Image(imageData);
       await newImage.save();
@@ -125,11 +111,12 @@ router.post(
       // Return image details
       res.status(201).json({
         message: "Image uploaded successfully",
-        url: result.secure_url,
-        public_id: result.public_id,
+        url: response.secure_url,
+        public_id: response.public_id,
         _id: newImage._id,
-        format: result.format,
+        format: response.format,
       });
+
     } catch (error) {
       console.error("Error in upload route:", error);
       res.status(500).json({ error: "Upload failed: " + error.message });
@@ -189,8 +176,4 @@ router.get("/images", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 export default router;
-=======
-export default router;
->>>>>>> 3c9d585384a71df632648a8f872deb8697371209
