@@ -19,13 +19,13 @@ const InPageNavigation = ({ routes  }) => {
   }, [inPageNavIndex]);
 
   return (
-    <div className="relative mb-8 bg-white border-b border-gray-50 flex flex-nowrap  overflow-x-scroll scrollbar-hidden">
+    <div className="relative mb-8 bg-white border-b border-gray-50 flex flex-nowrap   max-sm:scrollbar-hidden">
       {routes.map((route, i) => (
         <button
           key={i}
           ref={(el) => (buttonsRef.current[i] = el)}
           onClick={() => changePageState(i)}
-          className={`p-4 px-5 capitalize ${
+          className={`p-4 px-5 capitalize text-xlt ${
             inPageNavIndex === i ? "text-black" : "text-gray-400"
           }`}
         >

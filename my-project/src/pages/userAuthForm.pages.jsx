@@ -1,10 +1,10 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useState } from "react";
+import { useNavigate, Navigate, Link } from "react-router-dom";
 import InputBox from "@/components/input.component";
 import { MdAlternateEmail } from "react-icons/md";
 import { CiLock } from "react-icons/ci";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import { FcGoogle } from "react-icons/fc";
-import { Link, Navigate } from "react-router-dom";
 import AnimationWrapper from "@/common/page-animation";
 import axios from "axios";
 import { BiUser } from "react-icons/bi";
@@ -12,34 +12,18 @@ import { toast, Toaster } from "react-hot-toast";
 import { storeInSession } from "@/common/session";
 import { UserContext } from "@/App";
 
-const UserAuthForm = ({ type }) => {
-  const authForm = useRef();
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
 
-  let {
+const UserAuthForm = ({ type }) => {
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const {
     userAuth: { access_token },
     setUserAuth,
   } = useContext(UserContext);
-  console.log(access_token);
-  console.log(sessionStorage.getItem("user"));
-
-  const userAuthThroughServer = (serverRoute, formData) => {
-    axios
-      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-      .then(({ data }) => {
-        storeInSession("user", JSON.stringify(data));
-        setUserAuth(data);
-      })
-      .catch((error) => {
-        console.log("Axios error:", error);
-        toast.error(error?.response?.data?.message || "Something went wrong");
-      });
-  };
-
-  console.log(import.meta.env.VITE_SERVER_DOMAIN);
 
   const [showPassword, setShowPassword] = useState(false);
   const togglePassword = () => setShowPassword(!showPassword);
@@ -53,43 +37,53 @@ const UserAuthForm = ({ type }) => {
   const handleSubmitForm = (e) => {
     e.preventDefault();
 
-    let serverRoute = type === "sign-in" ? "/signin" : "/signup";
-    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    let passwordRegex =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
-    //form data==>
-    let form = new FormData(authForm.current);
-    let formDataObj = {};
-    for (let [key, value] of form.entries()) {
-      formData[key] = value;
+    const form = new FormData(e.target);
+    const formDataObj = Object.fromEntries(form.entries());
+    const { fullname, email, password } = formDataObj;
+
+    if (type !== "sign-in" && fullname.length < 3) {
+      return toast.error("Fullname must be at least 3 letters long");
     }
-    console.log(formData);
-    console.log(formDataObj);
-    //form validation
-    let { fullname, email, password } = formData;
-    if (fullname) {
-      if (fullname.length < 3) {
-        return toast.error("Fullname must be at least 3 Letters Long");
-      }
-    }
-    if (email.length < 3) {
+    if (!email || email.length < 3) {
       return toast.error("Enter Email");
     }
     if (!emailRegex.test(email)) {
       return toast.error("Email is invalid");
     }
-    if(!password.length){
-      return toast.error(
-        "Password cannot be empty"
-      );
+    if (!password.length) {
+      return toast.error("Password cannot be empty");
     }
     if (!passwordRegex.test(password)) {
       return toast.error(
-        "Passowrd should be 6 to 20 Characters Long With a Numeric , 1 Lowercase and 1 Uppercase Letters"
+        "Password must be at least 8 characters, include uppercase, lowercase, number, and a special character"
       );
     }
-    userAuthThroughServer(serverRoute, formData);
+
+    const serverRoute = type === "sign-in" ? "/signin" : "/signup";
+    setLoading(true);
+
+    axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formDataObj, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then(({ data }) => {
+        storeInSession("user", JSON.stringify(data));
+        setUserAuth(data);
+
+        toast.success(type === "sign-in" ? "Signed in successfully" : "Signed up successfully");
+        navigate(type === "sign-in" ? "/" : "/authentication/verification");
+      })
+      .catch((error) => {
+        console.error("Axios error:", error);
+        toast.error(error?.response?.data?.message || "Something went wrong");
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -98,28 +92,30 @@ const UserAuthForm = ({ type }) => {
     }));
   };
 
-  return access_token ? (
-    <Navigate to="/" />
-  ) : (
+  if (access_token) return <Navigate to="/" />;
+
+  return (
     <AnimationWrapper keyValue={type}>
       <section className="h-screen flex items-center justify-center">
         <Toaster />
-        <form ref={authForm} className="w-[80%] max-w-[400px] bg-white p-6">
+        <form
+          id="formElement"
+          onSubmit={handleSubmitForm}
+          className="w-[80%] max-w-[400px] bg-white p-6"
+        >
           <h1 className="join-us-today text-center text-3xl font-semibold mb-6">
             {type === "sign-in" ? "Welcome Back" : "Join Us Today"}
           </h1>
 
           {type !== "sign-in" && (
-            <>
-              <InputBox
-                name="fullname"
-                type="text"
-                placeholder="Full Name"
-                icon={<BiUser size={24} />}
-                onChange={handleChange}
-                value={formData.fullname}
-              />
-            </>
+            <InputBox
+              name="fullname"
+              type="text"
+              placeholder="Full Name"
+              icon={<BiUser size={24} />}
+              onChange={handleChange}
+              value={formData.fullname}
+            />
           )}
 
           <InputBox
@@ -136,7 +132,6 @@ const UserAuthForm = ({ type }) => {
               name="password"
               type={showPassword ? "text" : "password"}
               placeholder="Password"
-              required
               value={formData.password}
               onChange={handleChange}
               className="input-box w-full pl-12 pr-12 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -157,11 +152,19 @@ const UserAuthForm = ({ type }) => {
           </div>
 
           <button
-            onClick={handleSubmitForm}
             type="submit"
-            className="w-full bg-[#212121] hover:bg-[#454444] text-white py-2 rounded-lg mt-4 transition-colors duration-300"
+            disabled={loading}
+            className={`w-full ${
+              loading ? "bg-gray-400" : "bg-[#212121] hover:bg-[#454444]"
+            } text-white py-2 rounded-lg mt-4 transition-colors duration-300`}
           >
-            {type === "sign-in" ? "Sign In" : "Sign Up"}
+            {loading
+              ? type === "sign-in"
+                ? "Signing In..."
+                : "Signing Up..."
+              : type === "sign-in"
+              ? "Sign In"
+              : "Sign Up"}
           </button>
 
           <div className="relative w-full flex justify-center items-center gap-2 my-10 opacity-10 uppercase text-black font-bold">
@@ -170,30 +173,33 @@ const UserAuthForm = ({ type }) => {
             <hr className="w-1/2 border-black" />
           </div>
 
-          <button className="border border-black hover:bg-gray-100 px-3 py-3 rounded-xl flex items-center justify-center w-full gap-2">
+          <button
+            type="button"
+            className="border border-black hover:bg-gray-100 px-3 py-3 rounded-xl flex items-center justify-center w-full gap-2"
+          >
             <FcGoogle size={20} />
             <span>Continue with Google</span>
           </button>
 
-          {type === "sign-up" ? (
-            <div className="flex justify-center items-center w-full">
-              <p className="mt-6 text-dark-grey">
-                Already a Member?
-                <Link to="/signin" className="underline text-black ml-1">
-                  Sign-In
-                </Link>
-              </p>
-            </div>
-          ) : (
-            <div className="flex justify-center items-center w-full">
-              <p className="mt-6 text-dark-grey">
-                Don't have an account?
-                <Link to="/signup" className="underline text-black ml-1">
-                  Sign-Up
-                </Link>
-              </p>
-            </div>
-          )}
+          <div className="flex justify-center items-center w-full">
+            <p className="mt-6 text-dark-grey">
+              {type === "sign-up" ? (
+                <>
+                  Already a Member?
+                  <Link to="/signin" className="underline text-black ml-1">
+                    Sign-In
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Don&apos;t have an account?
+                  <Link to="/signup" className="underline text-black ml-1">
+                    Sign-Up
+                  </Link>
+                </>
+              )}
+            </p>
+          </div>
         </form>
       </section>
     </AnimationWrapper>

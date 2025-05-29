@@ -5,13 +5,15 @@ import { createContext, useEffect, useState } from "react";
 import { lookInSession } from "./common/session";
 import { TailSpin } from "react-loader-spinner";
 import Editor from "./components/editor.pages";
-import '@/App.css'
+import "@/App.css";
 import SearchPage from "./pages/search.page";
 import HomePage from "./pages/home.page";
+import InputOTPForm from "./components/InputOTPForm";
 export const UserContext = createContext({});
 
 const App = () => {
   const [userAuth, setUserAuth] = useState({});
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -46,12 +48,16 @@ const App = () => {
   return (
     <UserContext.Provider value={{ userAuth, setUserAuth }}>
       <Routes>
-        <Route path="/editor" element={<Editor/>}/>
-        <Route path="/" element={<Header />}> 
-        <Route index element={<HomePage/>} />
+        <Route path="/editor" element={<Editor />} />
+        <Route path="/" element={<Header />}>
+          <Route index element={<HomePage />} />
           <Route path="signin" element={<UserAuthForm type="sign-in" />} />
           <Route path="signup" element={<UserAuthForm type="sign-up" />} />
-          <Route path="search/:query" element={<SearchPage/>}/> 
+          <Route
+            path="/authentication/verification"
+            element={<InputOTPForm />}
+          />
+          <Route path="search/:query" element={<SearchPage />} />
         </Route>
       </Routes>
     </UserContext.Provider>

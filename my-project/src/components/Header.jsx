@@ -4,7 +4,7 @@ import { Link, Outlet } from "react-router-dom";
 import { UserContext } from "@/App";
 import { Bell } from "lucide-react";
 import UserNavigationPanel from "./user-navigation.component";
-
+import { Avatar } from "@lemonsqueezy/wedges";
 const Header = () => {
   const {
     userAuth: { access_token, profilePhoto },
@@ -54,19 +54,18 @@ const Header = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleBlur =()=>{
+  const handleBlur = () => {
     setTimeout(() => {
-      setShowUserPanel(false)
+      setShowUserPanel(false);
     }, 200);
-    
-  }
+  };
 
   return (
     <>
       <nav
-        // className={`transition-transform duration-300 ${
-        //   showNavbar ? "translate-y-0" : "-translate-y-full"
-        // } fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 shadow-md`}
+      // className={`transition-transform duration-300 ${
+      //   showNavbar ? "translate-y-0" : "-translate-y-full"
+      // } fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-900 shadow-md`}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center w-full py-1 h-auto">
@@ -91,7 +90,7 @@ const Header = () => {
                   <Link to="/editor">Write</Link>
                 </li>
 
-                {!access_token ? (
+                {access_token ? (
                   <>
                     <li>
                       <Link to="/dashboard/notification">
@@ -102,13 +101,17 @@ const Header = () => {
                     </li>
                     <li className="relative" ref={userPanelRef}>
                       <button
-                        className="w-12 h-12 mt-1" onBlur={handleBlur}
+                        className="w-12 h-12 mt-1"
+                        onBlur={handleBlur}
                         onClick={() => setShowUserPanel((prev) => !prev)}
                       >
-                        <img
+                        <Avatar
+                          alt="Max Quest"
+                          size="3xl"
                           src={profilePhoto}
-                          className="w-full h-full object-cover rounded-full"
+                          // src="https://images.unsplash.com/photo-1560800452-f2d475982b96?w=250&h=250&auto=format&fit=crop"
                         />
+                        
                       </button>
                       {showUserPanel && <UserNavigationPanel />}
                     </li>
