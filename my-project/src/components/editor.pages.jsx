@@ -10,7 +10,7 @@ const blogStructure = {
   content: [],
   tags: [],
   des: "",
-  author: [],
+  author: "",
 };
 
 export const EditorContext = createContext({});

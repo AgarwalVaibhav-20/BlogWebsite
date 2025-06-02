@@ -1,12 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
 const blogSchema = mongoose.Schema({
-
-    blog_id: {
-        type: String,
-        required: true,
-        unique: true,
-    },
     title: {
         type: String,
         required: true,
@@ -29,7 +23,7 @@ const blogSchema = mongoose.Schema({
         // required: true
     },
     author: {
-        type: Schema.Types.ObjectId,
+        type: String,
         required: true,
         ref: 'users'
     },

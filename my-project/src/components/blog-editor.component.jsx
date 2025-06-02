@@ -124,16 +124,6 @@ const BlogEditor = () => {
     return text.length > 150 ? text.slice(0, 150) + "..." : text;
   };
 
-  const getUserInfo = () => {
-    const user = JSON.parse(localStorage.getItem("userData") || "{}");
-    return {
-      id: user.id || "anonymous",
-      name: user.name || "Anonymous",
-      email: user.email || "",
-      avatar: user.avatar || "",
-    };
-  };
-
   const handlePublishEvent = async () => {
     if (!bannerImage || bannerImage === blogBanner) {
       return toast.error("Upload a banner before publishing.");
@@ -165,6 +155,8 @@ const BlogEditor = () => {
         finalBanner = uploadedImage?.url || bannerImage;
       }
 
+      const user = JSON.parse(localStorage.getItem("userData") || "{}");
+
       const blogData = {
         title: title.trim(),
         banner: finalBanner,
@@ -174,7 +166,7 @@ const BlogEditor = () => {
         category: blog.category || "General",
         status: "published",
         publishedAt: new Date().toISOString(),
-        author: blog.author || getUserInfo(),
+        author: user.email,
       };
 
       const response = await axios.post(import.meta.env.VITE_API_BLOG, blogData);
@@ -204,6 +196,7 @@ console.log("API URL:", import.meta.env.VITE_API_BLOG);
     try {
       const editorData = editorReady && textEditor ? await textEditor.save() : { blocks: [] };
 
+      const user = JSON.parse(localStorage.getItem("userData") || "{}");
       const draftData = {
         title: title.trim(),
         banner: bannerImage !== blogBanner ? bannerImage : null,
@@ -213,7 +206,7 @@ console.log("API URL:", import.meta.env.VITE_API_BLOG);
         category: blog.category || "General",
         status: "draft",
         lastModified: new Date().toISOString(),
-        author: blog.author || getUserInfo(),
+        author: user.email,
       };
 
       const response = await axios.post("/api/blogs/draft", draftData);
@@ -249,7 +242,7 @@ console.log("API URL:", import.meta.env.VITE_API_BLOG);
                 : "bg-gray-400 text-white cursor-not-allowed"
             }`}
           >
-            {isPublishing ? "Posting..." : "Post"}
+            {isPublishing ? "Publishing..." : "Publish"}
           </button>
           <button
             onClick={handleDraft}
