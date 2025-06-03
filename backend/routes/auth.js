@@ -224,6 +224,8 @@ router.post("/signin", async (req, res) => {
 
     // Check password
     console.log("🔍 Comparing passwords...");
+    console.log("🔍 saved passwords...", user.password);
+    console.log("🔍 got passwords...", password);
     const isMatch = await bcrypt.compare(password, user.password);
     console.log("🔐 Password match result:", isMatch);
     
