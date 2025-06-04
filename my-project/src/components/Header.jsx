@@ -113,12 +113,12 @@ const Header = () => {
                         />
                         
                       </button>
-                      {showUserPanel && <UserNavigationPanel />}
+                      {showUserPanel ? <UserNavigationPanel /> : ""}
                     </li>
                   </>
                 ) : (
-                  <li className="hover:bg-[#403d39] cursor-pointer text-[18px] space-x-2 border p-2 rounded-xl bg-[#252422] text-white">
-                    <Link to="/signin">Sign-in</Link>
+                  <li className="hover:bg-[#403d39] cursor-pointer text-[18px] space-x-2 border p-2 rounded-xl bg-[#252422] text-white max-sm:text-xl ">
+                    <Link to="/signin">LogIn</Link>
                   </li>
                 )}
               </ul>

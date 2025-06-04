@@ -1,7 +1,10 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useContext } from 'react';
 import { CiSearch } from "react-icons/ci";
 import { IoMdClose } from "react-icons/io";
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { UserContext } from '@/App';
 
 const SearchBox = () => {
   const [input, setInput] = useState("");
@@ -10,35 +13,35 @@ const SearchBox = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const searchRef = useRef(null);
-  const [error, setError] = useState(null);
   const debounceTimeout = useRef(null);
 
-  // Fetch users once when the component mounts
+  const navigate = useNavigate();
+  const {
+    userAuth: { access_token },
+  } = useContext(UserContext);
+
+  // Fetch users when component mounts
   useEffect(() => {
-    const fetchUsers = async (searchTerm = "") => {
+    const fetchUsers = async () => {
       try {
         const response = await axios.get("/search/searchbar", {
-          params: { fullname: searchTerm, email: searchTerm,profilePhoto:searchTerm , page: 1, limit: 10 }
+          params: { fullname: "", username: "", profilePhoto: "", page: 1, limit: 10 }
         });
-    
-        console.log("Fetched users:", response.data); // Debugging log
         setUsers(response.data.users || []);
       } catch (error) {
         console.error("Error fetching users:", error);
         setUsers([]);
       }
     };
-    
     fetchUsers();
   }, []);
-  
-  
 
-  // Handle outside click to close dropdown
+  // Close dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setIsOpen(false);
+        setSelectedIndex(-1);
       }
     };
 
@@ -48,38 +51,41 @@ const SearchBox = () => {
     };
   }, []);
 
-  // Debounced search function to optimize filtering
+  // Handle input search with authentication check
   const handleSearch = useCallback((value) => {
+    if (!access_token) {
+      toast.error("Please login to search users.");
+      navigate("/signin");
+      return;
+    }
+
     setInput(value);
     setIsOpen(true);
-  
+
     if (debounceTimeout.current) {
       clearTimeout(debounceTimeout.current);
     }
-  
+
     debounceTimeout.current = setTimeout(() => {
       if (value.trim() === "") {
         setResults([]);
         return;
       }
-  
-      // Ensure `users` is an array before filtering
+
       if (!Array.isArray(users)) {
-        console.error("Users data is not an array:", users);
         setResults([]);
         return;
       }
-  
+
       const filteredData = users.filter((user) =>
-        user.fullname?.toLowerCase().includes(value.toLowerCase()) || // Ensure `user.name` exists
-        user.email?.toLowerCase().includes(value.toLowerCase())   // Ensure `user.email` exists
+        user.fullname?.toLowerCase().includes(value.toLowerCase()) ||
+        user.username?.toLowerCase().includes(value.toLowerCase())
       );
       setResults(filteredData);
     }, 300);
-  }, [users]);
-  
+  }, [users, access_token, navigate]);
 
-  // Handle keyboard navigation
+  // Keyboard navigation
   const handleKeyDown = (e) => {
     if (results.length === 0) return;
 
@@ -91,10 +97,10 @@ const SearchBox = () => {
         setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
         break;
       case 'Enter':
-        e.preventDefault(); // Prevent form submission
+        e.preventDefault();
         if (selectedIndex !== -1) {
           const selectedUser = results[selectedIndex];
-          setInput(selectedUser.name);
+          setInput(selectedUser.username);
           setIsOpen(false);
         }
         break;
@@ -107,8 +113,9 @@ const SearchBox = () => {
   };
 
   const toggleSearch = () => {
-    setIsOpen(!isOpen);
     setInput("");
+    setIsOpen(false);
+    setSelectedIndex(-1);
     setResults([]);
   };
 
@@ -129,7 +136,6 @@ const SearchBox = () => {
           aria-haspopup="listbox"
           role="combobox"
           aria-expanded={isOpen}
-          onFocus={true}
         />
         {input && (
           <button 
@@ -144,38 +150,34 @@ const SearchBox = () => {
 
       {isOpen && results.length > 0 && (
         <ul 
-        className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-1 max-h-60 overflow-y-auto shadow-lg"
-        role="listbox"
-      >
-        {results.map((user, index) => (
-          <li 
-            key={user.id}
-            role="option"
-            aria-selected={selectedIndex === index}
-            className={`p-3 cursor-pointer flex items-center gap-3 
-              ${selectedIndex === index ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
-            onMouseEnter={() => setSelectedIndex(index)}
-            onClick={() => {
-              setInput(user.fullname);
-              setIsOpen(false);
-            }}
-          >
-            {/* Profile Image */}
-            <img 
-              src={user.profilePhoto} // Fallback image
-              alt={user.fullname} 
-              className="w-10 h-10 rounded-full object-cover border"
-            />
-            
-            {/* User Details */}
-            <div className="flex-1">
-              <div className="font-medium text-gray-800">{user.fullname}</div>
-              <div className="text-sm text-gray-500">{user.email}</div>
-            </div>
-          </li>
-        ))}
-      </ul>
-      
+          className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-1 max-h-60 overflow-y-auto shadow-lg"
+          role="listbox"
+        >
+          {results.map((user, index) => (
+            <li 
+              key={user.id}
+              role="option"
+              aria-selected={selectedIndex === index}
+              className={`p-3 cursor-pointer flex items-center gap-3 
+                ${selectedIndex === index ? 'bg-blue-100' : 'hover:bg-gray-100'}`}
+              onMouseEnter={() => setSelectedIndex(index)}
+              onClick={() => {
+                setInput(user.username);
+                setIsOpen(false);
+              }}
+            >
+              <img 
+                src={user.profilePhoto} 
+                alt={user.fullname} 
+                className="w-10 h-10 rounded-full object-cover border"
+              />
+              <div className="flex-1">
+                <div className="font-medium text-gray-800">{user.fullname}</div>
+                <div className="text-sm text-gray-500">{user.username}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

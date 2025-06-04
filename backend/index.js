@@ -4,10 +4,9 @@ import cors from "cors";
 import DBConnect from "./DB/DBconnect.js";
 import userSchema from "./routes/auth.js";
 import searchbar from "./routes/searchbar.js";
-import verification from "./routes/verifyUser.js";
+import verification from './routes/auth.js'
 import Image from "./routes/imageRoute.js";
 import blog from "./routes/blog.js";
-
 dotenv.config();
 
 const app = express();

@@ -2,22 +2,22 @@ import express from "express";
 const router = express.Router();
 import User from "../models/user.js";
 
-// Search user by fullname or email with pagination
+// Search user by fullname or username with pagination
 router.get("/searchbar", async (req, res) => {
   try {
-    const { fullname, email, page = 1, limit = 10 } = req.query;
+    const { fullname, username, page = 1, limit = 10 } = req.query;
 
-    console.log("Received Query Params:", { fullname, email, page, limit });
+    console.log("Received Query Params:", { fullname, username, page, limit });
 
     // Build search conditions using $or
     let searchQuery = {};
-    if (fullname || email) {
+    if (fullname || username) {
       searchQuery.$or = [];
       if (fullname?.trim()) {
         searchQuery.$or.push({ fullname: new RegExp(fullname, "i") });
       }
-      if (email?.trim()) {
-        searchQuery.$or.push({ email: new RegExp(email, "i") });
+      if (username?.trim()) {
+        searchQuery.$or.push({ username: new RegExp(username, "i") });
       }
     }
 
@@ -29,7 +29,7 @@ router.get("/searchbar", async (req, res) => {
     const skip = (pageNumber - 1) * limitNumber;
 
     // Fetch users with pagination and select fields explicitly
-    const searchData = await User.find(searchQuery, "fullname email profilePhoto") 
+    const searchData = await User.find(searchQuery, "fullname username profilePhoto") 
       .skip(skip)
       .limit(limitNumber);
 

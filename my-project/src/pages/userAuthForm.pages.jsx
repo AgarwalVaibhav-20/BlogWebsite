@@ -92,7 +92,7 @@ const UserAuthForm = ({ type }) => {
     }));
   };
 
-  if (access_token) return <Navigate to="/" />;
+  if (access_token) return Navigate(type === "sign-in" ? "/" : "/authentication/verification")
 
   return (
     <AnimationWrapper keyValue={type}>

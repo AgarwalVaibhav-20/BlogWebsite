@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import ClipLoader from 'react-spinners/ClipLoader';
+import ClipLoader from "react-spinners/ClipLoader";
 
 // import "dotenv/config"
 export function InputOTPForm() {
@@ -53,6 +53,8 @@ export function InputOTPForm() {
         navigate("/"); // Navigate on success
       } catch (error) {
         toast.error("Verification failed");
+        console.log("Sending OTP:", pinValue);
+        console.log("Verify endpoint:", import.meta.env.VITE_SERVER_VERIFY);
         console.error(error);
       } finally {
         setLoading(false);
@@ -82,6 +84,7 @@ export function InputOTPForm() {
                   id={`pin-${index}`}
                   type="text"
                   maxLength="1"
+                  name="otp"
                   value={digit}
                   onChange={(e) => handlePinChange(index, e.target.value, e)}
                   onKeyDown={(e) => handlePinChange(index, e.target.value, e)}
